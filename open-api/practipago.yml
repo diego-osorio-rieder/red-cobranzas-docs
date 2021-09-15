@@ -48,12 +48,14 @@ paths:
         required: true
         schema:
           type: "string"
+          example: "RC"
       - in: "query"
         name: "nro_documento"
         description: "Número de documento de identidad o RUC del cliente (con o sin guiones)"
         required: true
         schema:
           type: "string"
+          example: "1234567-8"
       responses:
         "200":
           description: "Consulta realizada con éxito"

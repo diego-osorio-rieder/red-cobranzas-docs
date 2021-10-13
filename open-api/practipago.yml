@@ -162,7 +162,7 @@ components:
       type: "object"
       properties:
         cod_cuenta:
-          description: "Código de referencia único para la deuda a cobrar"
+          description: "CÓDIGO DE REFERENCIA ÚNICO PARA LA DEUDA A COBRAR"
           type: "string"
           example: "RC-1234567-1"
         descripcion:
@@ -170,11 +170,15 @@ components:
           type: "string"
           example: "Automóviles Renault"
         nro_documento:
-          description: "Número de la factura a la que corresponde la deuda"
+          description: "Número del documento que originó la deuda"
           type: "string"
           example: "001-001-0000123"
+        tipo_documento:
+          description: "Tipo de documento que originó la deuda"
+          type: "string"
+          example: "Factura"
         nro_cuota:
-          description: "Si la factura no tiene cuotas, nro_cuota tiene valor null"
+          description: "Si el documento de origen no tiene cuotas, nro_cuota tiene valor null"
           type: "string"
           example: "1/12"
         fecha_emision:
@@ -208,12 +212,12 @@ components:
           type: "number"
           example: "6500.00"
         importe_a_cobrar_gs:
-          description: "Importe a cobrar por el servicio de cobranzas en moneda Guaranies. Es la suma de saldo + interes multiplicado por el valor de tasa_cambio"
+          description: "IMPORTE A COBRAR POR EL SERVICIO DE COBRANZAS EN MONEDA GUARANIES. Es la suma de saldo + interes multiplicado por el valor de tasa_cambio"
           type: "integer"
           format: "int32"
           example: "780000"
         importe_minimo_a_cobrar_gs:
-          description: "Monto mínimo a cobrar por el servicio de cobranzas en moneda Guaranies. Si es igual a monto_a_cobrar_gs (normalmente) significa que no se aceptan pagos parciales."
+          description: "MONTO MÍNIMO A COBRAR POR EL SERVICIO DE COBRANZAS EN MONEDA GUARANIES. Si es igual a monto_a_cobrar_gs (normalmente) significa que no se aceptan pagos parciales."
           type: "integer"
           format: "int32"
           example: "780000"

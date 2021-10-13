@@ -7,9 +7,9 @@ info:
   version: "1.0.0"
 
 servers:
-  - url: https://dev/red-cobranzas/practipago/api
+  - url: https://devintranet.rieder.com.py/redes-cobranza/practipago/api
     description: Entorno de pruebas
-  - url: https://prod/red-cobranzas/practipago/api
+  - url: https://intranet.rieder.com.py/redes-cobranza/practipago/api
     description: Entorno de producción
 
 paths:

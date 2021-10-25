@@ -4,10 +4,10 @@ openapi: 3.0.0
 info:
   title: "Red de cobranzas PractiPago"
   description: Documentación de la API que interconexión entre sistemas del Grupo Rieder con la red de cobranzas PractiPago.
-  version: "1.0.0"
+  version: "1.0.1"
 
 servers:
-  - url: https://devintranet.rieder.com.py/redes-cobranza/practipago/api
+  - url: https://intranet.rieder.com.py/redes-cobranza-testing/practipago/api
     description: Entorno de pruebas
   - url: https://intranet.rieder.com.py/redes-cobranza/practipago/api
     description: Entorno de producción
@@ -22,16 +22,23 @@ paths:
           content:
             application/json:
               schema:
-                type: "array"
-                items:
-                  $ref: "#/components/schemas/Servicios"
-              example:
-              - cod_producto: "RC"
-                des_producto: "Rieder & Cia."
-              - cod_producto: "MM"
-                des_producto: "Motormarket S.A."
-              - cod_producto: "RI"
-                des_producto: "Rieder Internet"
+                type: "object"
+                properties:
+                  success:
+                    type: "boolean"
+                    description: "True cuando la consulta se realiza con éxito"
+                    example: true
+                  servicios:
+                    type: "array"
+                    items:
+                      $ref: "#/components/schemas/Servicios"
+                    example:
+                    - cod_producto: "RC"
+                      des_producto: "Rieder & Cia."
+                    - cod_producto: "MM"
+                      des_producto: "Motormarket S.A."
+                    - cod_producto: "RI"
+                      des_producto: "Rieder Internet"
         "401":
           $ref: "#/components/responses/UnauthorizedError"
         "500":
@@ -60,13 +67,11 @@ paths:
           example: "1234567-8"
       responses:
         "200":
-          description: "Consulta realizada con éxito"
+          description: "Consulta realizada con éxito. NOTAR QUE si success = false, el cliente fue identificado, pero no se encuentran cuentas por cobrar para el mismo"
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/ResultadoConsultaCuentas"
-        "202":
-          description: "Cliente identificado, pero no tiene deudas del producto especificado, o dichas deudas no pueden cobrarse por esta plataforma de pagos"
         "400":
           description: "Error al realizar la consulta"
           content:
@@ -75,8 +80,6 @@ paths:
                 $ref: "#/components/schemas/ApiError"
         "401":
           $ref: "#/components/responses/UnauthorizedError"
-        "404":
-          description: "No se encontró al cliente con el número de documento o RUC especificados"
         "500":
           description: "Error interno del servidor al procesar la solicitud"
           content:
@@ -95,6 +98,10 @@ paths:
       responses:
         "200":
           description: "Proceso realizado con éxito"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ResultadoOperacion"
         "400":
           description: "Error al registrar el cobro"
           content:
@@ -121,6 +128,10 @@ paths:
       responses:
         "200":
           description: "Proceso realizado con éxito"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ResultadoOperacion"
         "400":
           description: "Error al reversar el cobro"
           content:
@@ -167,7 +178,7 @@ components:
       properties:
         cod_cliente:
           type: "string"
-          example: "RC-12345"
+          example: "1-12345"
         nom_cliente:
           type: "string"
           example: "Juan Pérez"
@@ -183,7 +194,7 @@ components:
         cod_cuenta:
           description: "CÓDIGO DE REFERENCIA ÚNICO PARA LA DEUDA A COBRAR"
           type: "string"
-          example: "RC-1234567-1"
+          example: "1234567-1"
         descripcion:
           description: "Describe el origen de la deuda"
           type: "string"
@@ -243,12 +254,27 @@ components:
     ResultadoConsultaCuentas:
       type: "object"
       properties:
+        success:
+          type: "boolean"
+          description: "True si la consulta devuelve un detalle de cuentas a cobrar"
+          example: true
         cliente:
           $ref: "#/components/schemas/DatosCliente"
         cuentas:
           type: "array"
           items:
             $ref: "#/components/schemas/DatosCuenta"
+    ResultadoOperacion:
+      type: "object"
+      properties:
+        success:
+          type: "boolean"
+          description: "True cuando el proceso termina correctamente"
+          example: true
+        message:
+          type: "string"
+          description: "Mensaje (opcional) con más detalles sobre el resultado"
+          example: "Proceso realizado con éxito"
     RegistroCobros:
       required:
         - cod_producto
@@ -260,15 +286,16 @@ components:
         cod_producto:
           description: "Código del producto cobrado"
           type: "string"
-          example: "RYC"
+          example: "RC"
         cod_cliente:
           description: "Código del cliente al que se cobró"
           type: "string"
-          example: "RC-12345"
+          example: "1-12345"
         cod_operacion:
           description: "Código de la operación generado por el servicio de cobranzas"
-          type: "string"
-          example: "90123456789"
+          type: "integer"
+          format: "int64"
+          example: 90123456789
         detalle_cuentas:
           type: "array"
           items:
@@ -283,43 +310,63 @@ components:
         cod_cuenta:
           description: "Código de referencia único para la deuda a cobrar, obtenido en la llamada a /consultar-cuentas"
           type: "string"
-          example: "RC-1234567-1"
+          example: "1234567-1"
         tasa_cambio:
           description: "Usar el mismo valor de tasa_cambio obtenido en la llamada a /consultar-cuentas"
           type: "number"
-          example: "6500.00"
+          example: 6500.00
         monto_cobrado_gs:
           description: "Monto cobrado en guaraníes por el servicio de cobranzas"
           type: "integer"
           format: "int32"
-          example: "780000.00"
+          example: 780000
     ReversarCobro:
       required:
-      - "cod_operacion"
+        - cod_producto
+        - cod_operacion
       type: "object"
       properties:
+        cod_producto:
+          description: "Código del producto cobrado"
+          type: "string"
+          example: "RC"
         cod_operacion:
           description: "Código de la operación generado por el servicio de cobranzas"
-          type: "string"
-          example: "90123456789"
+          type: "integer"
+          format: "int64"
+          example: 90123456789
     ApiError:
       type: "object"
       properties:
+        success:
+          type: "boolean"
+          description: "False cuando el proceso termina con error"
+          example: false
         reason_code:
           type: "string"
           description: "Codigo de razón del error"
-          example: "CLIENTE_NO_ENCONTRADO"
+          example: "parametro_invalido"
           enum:
-          - ""
+          - "parametro_invalido"
+          - "cliente_no_encontrado"
+          - "pago_rechazado"
+          - "reversion_rechazada"
         message:
           type: "string"
           description: "Mensaje descriptivo del motivo del error"
-          example: "No se encontró un cliente con el número de documento/RUC especificado: 1234567-8"
+          example: "El valor de 'cod_producto' (XYZ) no es válido."
     InternalError:
       type: "object"
       properties:
+        success:
+          type: "boolean"
+          description: "False cuando el proceso termina con error"
+          example: false
+        message:
+          type: "string"
+          description: "Mensaje de error genérico"
+          example: "Error interno del servidor"
         trace_id:
           type: "string"
           description: "Código de traza que identifica a la sesión y los datos internos del error"
           example: "6418592A-9D8C-49AD-8523-3A213943FCF5"
-  

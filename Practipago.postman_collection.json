@@ -1,0 +1,197 @@
+{
+	"info": {
+		"_postman_id": "c42fd7f8-e5fe-47cf-b959-b7ea6849470c",
+		"name": "Practipago",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Obtener servicios",
+			"request": {
+				"auth": {
+					"type": "apikey",
+					"apikey": [
+						{
+							"key": "value",
+							"value": "70ZkSLFbclL+1e34+ALfw+6/a2dpiOk2BORwk2vPzxM=",
+							"type": "string"
+						},
+						{
+							"key": "key",
+							"value": "X-API-KEY",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "https://intranet.rieder.com.py/sig/redes-cobranza-testing/api/practipago/servicios",
+					"protocol": "https",
+					"host": [
+						"intranet",
+						"rieder",
+						"com",
+						"py"
+					],
+					"path": [
+						"sig",
+						"redes-cobranza-testing",
+						"api",
+						"practipago",
+						"servicios"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Consultar cuentas",
+			"request": {
+				"auth": {
+					"type": "apikey",
+					"apikey": [
+						{
+							"key": "value",
+							"value": "70ZkSLFbclL+1e34+ALfw+6/a2dpiOk2BORwk2vPzxM=",
+							"type": "string"
+						},
+						{
+							"key": "key",
+							"value": "X-API-KEY",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "https://intranet.rieder.com.py/sig/redes-cobranza-testing/api/practipago/consultar-cuentas?cod_producto=RC&nro_documento=11223344",
+					"protocol": "https",
+					"host": [
+						"intranet",
+						"rieder",
+						"com",
+						"py"
+					],
+					"path": [
+						"sig",
+						"redes-cobranza-testing",
+						"api",
+						"practipago",
+						"consultar-cuentas"
+					],
+					"query": [
+						{
+							"key": "cod_producto",
+							"value": "RC"
+						},
+						{
+							"key": "nro_documento",
+							"value": "11223344"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Registrar Cobro",
+			"request": {
+				"auth": {
+					"type": "apikey",
+					"apikey": [
+						{
+							"key": "value",
+							"value": "70ZkSLFbclL+1e34+ALfw+6/a2dpiOk2BORwk2vPzxM=",
+							"type": "string"
+						},
+						{
+							"key": "key",
+							"value": "X-API-KEY",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"cod_producto\": \"RC\",\r\n    \"cod_cliente\": \"1-42725\",\r\n    \"cod_operacion\": \"999900001\",\r\n    \"detalle_cuentas\": [\r\n        {\r\n            \"cod_cuenta\": \"2198205-5\",\r\n            \"tasa_cambio\": 6940.00,\r\n            \"monto_cobrado_gs\": 4337500\r\n        },\r\n        {\r\n            \"cod_cuenta\": \"2198206-6\",\r\n            \"tasa_cambio\": 6940.00,\r\n            \"monto_cobrado_gs\": 4337500\r\n        }\r\n    ]\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "https://intranet.rieder.com.py/sig/redes-cobranza-testing/api/practipago/registrar-cobro",
+					"protocol": "https",
+					"host": [
+						"intranet",
+						"rieder",
+						"com",
+						"py"
+					],
+					"path": [
+						"sig",
+						"redes-cobranza-testing",
+						"api",
+						"practipago",
+						"registrar-cobro"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Reversar Cobro",
+			"request": {
+				"auth": {
+					"type": "apikey",
+					"apikey": [
+						{
+							"key": "value",
+							"value": "70ZkSLFbclL+1e34+ALfw+6/a2dpiOk2BORwk2vPzxM=",
+							"type": "string"
+						},
+						{
+							"key": "key",
+							"value": "X-API-KEY",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"cod_producto\": \"RC\",\r\n    \"cod_operacion\": \"999900001\"\r\n}\r\n",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "https://intranet.rieder.com.py/sig/redes-cobranza-testing/api/practipago/reversar-cobro",
+					"protocol": "https",
+					"host": [
+						"intranet",
+						"rieder",
+						"com",
+						"py"
+					],
+					"path": [
+						"sig",
+						"redes-cobranza-testing",
+						"api",
+						"practipago",
+						"reversar-cobro"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}

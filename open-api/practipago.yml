@@ -7,9 +7,9 @@ info:
   version: "1.0.1"
 
 servers:
-  - url: https://intranet.rieder.com.py/redes-cobranza-testing/practipago/api
+  - url: https://intranet.rieder.com.py/sig/redes-cobranza-testing/api/practipago
     description: Entorno de pruebas
-  - url: https://intranet.rieder.com.py/redes-cobranza/practipago/api
+  - url: https://intranet.rieder.com.py/sig/redes-cobranza/api/practipago
     description: Entorno de producción
 
 paths:

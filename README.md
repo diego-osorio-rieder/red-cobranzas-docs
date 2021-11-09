@@ -3,3 +3,5 @@
     npm install -g redoc-cli
     cd open-api
     redoc-cli bundle -o ..\practipago.html practipago.yml
+    redoc-cli bundle -o ..\aquipago.html aquipago.yml
+    

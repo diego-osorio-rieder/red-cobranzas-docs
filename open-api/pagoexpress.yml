@@ -1,0 +1,372 @@
+## Use https://editor.swagger.io/ para verificar sintaxis
+## OpenAPI 3 Specs: https://swagger.io/docs/specification/about/
+openapi: 3.0.0
+info:
+  title: "Red de cobranzas Pago Express"
+  description: Documentación de la API que interconexión entre sistemas del Grupo Rieder con la red de cobranzas Pago Express.
+  version: "1.0.1"
+
+servers:
+  - url: https://intranet.rieder.com.py/sig/redes-cobranza-testing/api/pagoexpress
+    description: Entorno de pruebas
+  - url: https://intranet.rieder.com.py/sig/redes-cobranza/api/pagoexpress
+    description: Entorno de producción
+
+paths:
+  /servicios:
+    get:
+      summary: "Obtiene la lista de servicios disponibles para la cobranza"
+      responses:
+        "200":
+          description: "Consulta realizada con éxito"
+          content:
+            application/json:
+              schema:
+                type: "object"
+                properties:
+                  success:
+                    type: "boolean"
+                    description: "True cuando la consulta se realiza con éxito"
+                    example: true
+                  servicios:
+                    type: "array"
+                    items:
+                      $ref: "#/components/schemas/Servicios"
+                    example:
+                    - cod_producto: "RC"
+                      des_producto: "Rieder & Cia."
+                    - cod_producto: "MM"
+                      des_producto: "Motormarket S.A."
+                    - cod_producto: "RI"
+                      des_producto: "Rieder Internet"
+        "401":
+          $ref: "#/components/responses/UnauthorizedError"
+        "500":
+          description: "Error interno del servidor al procesar la solicitud"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/InternalError"
+  /consultar-cuentas:
+    get:
+      summary: "Consulta cuentas por cobrar por cliente y producto específico"
+      parameters:
+      - in: "query"
+        name: "cod_producto"
+        description: "Código de producto que se desea cobrar. La lista de códigos está dada por el endpoint /servicios"
+        required: true
+        schema:
+          type: "string"
+          example: "RC"
+      - in: "query"
+        name: "nro_documento"
+        description: "Número de documento de identidad o RUC del cliente (con o sin guiones)"
+        required: true
+        schema:
+          type: "string"
+          example: "1234567-8"
+      responses:
+        "200":
+          description: "Consulta realizada con éxito. NOTAR QUE si success = false, el cliente fue identificado, pero no se encuentran cuentas por cobrar para el mismo"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ResultadoConsultaCuentas"
+        "400":
+          description: "Error al realizar la consulta"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiError"
+        "401":
+          $ref: "#/components/responses/UnauthorizedError"
+        "500":
+          description: "Error interno del servidor al procesar la solicitud"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/InternalError"
+  /registrar-cobro:
+    post:
+      summary: "Registra el cobro de cuentas de clientes"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RegistroCobros"
+      responses:
+        "200":
+          description: "Proceso realizado con éxito"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ResultadoOperacion"
+        "400":
+          description: "Error al registrar el cobro"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiError"
+        "401":
+          $ref: "#/components/responses/UnauthorizedError"
+        "500":
+          description: "Error interno del servidor al procesar la solicitud"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/InternalError"
+  /reversar-cobro:
+    post:
+      summary: "Reversa un cobro previamente registrado por el servicio de cobranza"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ReversarCobro"
+      responses:
+        "200":
+          description: "Proceso realizado con éxito"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ResultadoOperacion"
+        "400":
+          description: "Error al reversar el cobro"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiError"
+        "401":
+          $ref: "#/components/responses/UnauthorizedError"
+        "500":
+          description: "Error interno del servidor al procesar la solicitud"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/InternalError"
+
+security:
+  - ApiKeyAuth: []
+  
+components:
+  securitySchemes:
+    ApiKeyAuth:        # arbitrary name for the security scheme
+      type: apiKey
+      in: header       # can be "header", "query" or "cookie"
+      name: X-API-KEY  # name of the header, query parameter or cookie
+  responses:
+    UnauthorizedError:
+      description: API key (HTTP Header 'X-API-KEY') no enviada o inválida
+      headers:
+        WWW_Authenticate:
+          schema:
+            type: string
+  schemas:
+    Servicios:
+      type: "object"
+      properties:
+        cod_producto:
+          type: "string"
+          example: "RI"
+        des_producto:
+          type: "string"
+          example: "Rieder Internet"
+    DatosCliente:
+      type: "object"
+      properties:
+        cod_cliente:
+          type: "string"
+          example: "1-12345"
+        nom_cliente:
+          type: "string"
+          example: "Juan Pérez"
+        nro_doc_id:
+          type: "string"
+          example: "1234567"
+        tipo_doc_id:
+          type: "string"
+          example: "Cedula de Identidad"
+    DatosCuenta:
+      type: "object"
+      properties:
+        cod_cuenta:
+          description: "CÓDIGO DE REFERENCIA ÚNICO PARA LA DEUDA A COBRAR"
+          type: "string"
+          example: "1234567-1"
+        descripcion:
+          description: "Describe el origen de la deuda"
+          type: "string"
+          example: "Automóviles Renault"
+        nro_documento:
+          description: "Número del documento que originó la deuda"
+          type: "string"
+          example: "001-001-0000123"
+        tipo_documento:
+          description: "Tipo de documento que originó la deuda"
+          type: "string"
+          example: "Factura"
+        nro_cuota:
+          description: "Si el documento de origen no tiene cuotas, nro_cuota tiene valor null"
+          type: "string"
+          example: "1/12"
+        fecha_emision:
+          type: "string"
+          format: "date"
+          example: "2021-01-01"
+        fecha_vencimiento:
+          type: "string"
+          format: "date"
+          example: "2021-07-30"
+        moneda:
+          type: "string"
+          enum:
+          - "GS"
+          - "USD"
+          example: "USD"
+        importe_original:
+          description: "Importe original de la cuenta a cobrar expresado en la moneda original del documento"
+          type: "number"
+          example: "120.00"
+        saldo_actual:
+          description: "Saldo de la cuenta a cobrar expresado en la moneda original del documento. Normalmente es el mismo que importe_original, excepto en casos donde previamente el cliente hizo un pago parcial de la deuda o se aplicó alguna nota de crédito sobre la misma."
+          type: "number"
+          example: "120.00"
+        intereses:
+          description: "Importe de intereses moratorios y/o punitorios a cobrar, expresado en la moneda original del documento. Si el valor es diferente a cero, se generará una factura por este concepto y se le enviará al cliente por algún medio. Esta facturación no será realizada por el servicio de cobranzas."
+          type: "number"
+          example: "0"
+        tasa_cambio:
+          description: "Tasa de cambio al que convierte el saldo de la deuda en moneda extranjera para su cobro en guaranies. Si la moneda original del documento es guaraníes, se devuelve 1 (uno)"
+          type: "number"
+          example: "6500.00"
+        importe_a_cobrar_gs:
+          description: "IMPORTE A COBRAR POR EL SERVICIO DE COBRANZAS EN MONEDA GUARANIES. Es la suma de saldo + interes multiplicado por el valor de tasa_cambio"
+          type: "integer"
+          format: "int32"
+          example: "780000"
+        importe_minimo_a_cobrar_gs:
+          description: "MONTO MÍNIMO A COBRAR POR EL SERVICIO DE COBRANZAS EN MONEDA GUARANIES. Si es igual a monto_a_cobrar_gs (normalmente) significa que no se aceptan pagos parciales."
+          type: "integer"
+          format: "int32"
+          example: "780000"
+    ResultadoConsultaCuentas:
+      type: "object"
+      properties:
+        success:
+          type: "boolean"
+          description: "True si la consulta devuelve un detalle de cuentas a cobrar"
+          example: true
+        cliente:
+          $ref: "#/components/schemas/DatosCliente"
+        cuentas:
+          type: "array"
+          items:
+            $ref: "#/components/schemas/DatosCuenta"
+    ResultadoOperacion:
+      type: "object"
+      properties:
+        success:
+          type: "boolean"
+          description: "True cuando el proceso termina correctamente"
+          example: true
+        message:
+          type: "string"
+          description: "Mensaje (opcional) con más detalles sobre el resultado"
+          example: "Proceso realizado con éxito"
+    RegistroCobros:
+      required:
+        - cod_producto
+        - cod_cliente
+        - cod_operacion
+        - detalle_cuentas
+      type: "object"
+      properties:
+        cod_producto:
+          description: "Código del producto cobrado"
+          type: "string"
+          example: "RC"
+        cod_cliente:
+          description: "Código del cliente al que se cobró"
+          type: "string"
+          example: "1-12345"
+        cod_operacion:
+          description: "Código de la operación generado por el servicio de cobranzas"
+          type: "integer"
+          format: "int64"
+          example: 90123456789
+        detalle_cuentas:
+          type: "array"
+          items:
+            $ref: "#/components/schemas/RegistroCobrosCuentas"
+    RegistroCobrosCuentas:
+      required:
+        - cod_cuenta
+        - tasa_cambio
+        - monto_cobrado_gs
+      type: "object"
+      properties:
+        cod_cuenta:
+          description: "Código de referencia único para la deuda a cobrar, obtenido en la llamada a /consultar-cuentas"
+          type: "string"
+          example: "1234567-1"
+        tasa_cambio:
+          description: "Usar el mismo valor de tasa_cambio obtenido en la llamada a /consultar-cuentas"
+          type: "number"
+          example: 6500.00
+        monto_cobrado_gs:
+          description: "Monto cobrado en guaraníes por el servicio de cobranzas"
+          type: "integer"
+          format: "int32"
+          example: 780000
+    ReversarCobro:
+      required:
+        - cod_producto
+        - cod_operacion
+      type: "object"
+      properties:
+        cod_producto:
+          description: "Código del producto cobrado"
+          type: "string"
+          example: "RC"
+        cod_operacion:
+          description: "Código de la operación generado por el servicio de cobranzas"
+          type: "integer"
+          format: "int64"
+          example: 90123456789
+    ApiError:
+      type: "object"
+      properties:
+        success:
+          type: "boolean"
+          description: "False cuando el proceso termina con error"
+          example: false
+        reason_code:
+          type: "string"
+          description: "Codigo de razón del error"
+          example: "parametro_invalido"
+          enum:
+          - "parametro_invalido"
+          - "cliente_no_encontrado"
+          - "pago_rechazado"
+          - "reversion_rechazada"
+        message:
+          type: "string"
+          description: "Mensaje descriptivo del motivo del error"
+          example: "El valor de 'cod_producto' (XYZ) no es válido."
+    InternalError:
+      type: "object"
+      properties:
+        success:
+          type: "boolean"
+          description: "False cuando el proceso termina con error"
+          example: false
+        message:
+          type: "string"
+          description: "Mensaje de error genérico"
+          example: "Error interno del servidor"
+        trace_id:
+          type: "string"
+          description: "Código de traza que identifica a la sesión y los datos internos del error"
+          example: "6418592A-9D8C-49AD-8523-3A213943FCF5"
